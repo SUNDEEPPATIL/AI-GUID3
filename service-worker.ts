@@ -1,0 +1,93 @@
+
+/// <reference lib="webworker" />
+
+// FIX: Cast `self` to `ServiceWorkerGlobalScope` and assign it to a new constant `sw`.
+// This resolves a "Subsequent variable declarations must have the same type" error
+// that occurs when TypeScript's DOM library (which also defines `self`) is included
+// globally. This ensures `self` is correctly typed for this service worker file,
+// making service worker-specific APIs like `skipWaiting()` and `clients` available.
+const sw = self as unknown as ServiceWorkerGlobalScope;
+
+const CACHE_NAME = 'gadget-guide-ai-v2';
+const APP_SHELL_URLS = [
+  '/',
+  '/index.html',
+  '/index.js',
+  '/manifest.json',
+  '/icon.svg',
+];
+
+// Install: Cache the app shell
+sw.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[Service Worker] Caching app shell');
+        return cache.addAll(APP_SHELL_URLS);
+      })
+      .then(() => sw.skipWaiting())
+  );
+});
+
+// Activate: Clean up old caches
+sw.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+      );
+    }).then(() => sw.clients.claim())
+  );
+});
+
+// Fetch: Serve from cache, fallback to network, and update cache
+sw.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
+  const url = new URL(event.request.url);
+
+  // For cross-origin requests (like from the CDN), use a stale-while-revalidate strategy.
+  if (url.origin === 'https://aistudiocdn.com') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // For app shell and other local assets, use a network-first strategy.
+  event.respondWith(
+    fetch(event.request)
+      .then((networkResponse) => {
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        return networkResponse;
+      })
+      .catch(() => {
+        // If the fetch fails (offline), get from the cache.
+        return caches.match(event.request)
+          .then(response => {
+            if (response) return response;
+            // A proper offline page could be returned here if one was cached.
+            // For now, just let the browser handle the network error.
+            throw new Error('Network error and no cache match');
+          });
+      })
+  );
+});

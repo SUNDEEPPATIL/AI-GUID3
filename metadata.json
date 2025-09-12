@@ -1,0 +1,7 @@
+{
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "name": "Gadget Guide AI",
+  "description": "An AI-powered guide to find the best gadgets and appliances in India, now installable as an app for offline access."
+}
