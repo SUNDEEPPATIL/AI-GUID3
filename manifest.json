@@ -1,33 +1,27 @@
 {
-  "short_name": "Gadget Guide",
   "name": "Gadget Guide AI",
-  "description": "An AI-powered guide to find the best gadgets and appliances in India, now installable as an app for offline access.",
+  "short_name": "Gadget Guide",
+  "description": "AI-powered gadget search and comparison tool",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "scope": ".",
+  "orientation": "portrait",
+  "categories": ["shopping", "utilities", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
-      "src": "/icon.svg",
-      "type": "image/svg+xml",
+      "src": "icon.svg",
       "sizes": "any",
-      "purpose": "any"
-    }
-  ],
-  "start_url": ".",
-  "scope": "/",
-  "display": "standalone",
-  "theme_color": "#1f2937",
-  "background_color": "#111827",
-  "related_applications": [
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.example.gadgetguide",
-      "id": "com.example.gadgetguide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "My Wishlist",
-      "short_name": "Wishlist",
-      "description": "View your saved products",
-      "url": "/?view=wishlist"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     }
   ]
 }
