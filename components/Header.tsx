@@ -2,17 +2,14 @@ import React from 'react';
 import MobileSignalIcon from './icons/MobileSignalIcon';
 import HeartIcon from './icons/HeartIcon';
 import Tooltip from './Tooltip';
-import DownloadIcon from './icons/DownloadIcon';
 
 interface HeaderProps {
   onHomeClick: () => void;
   wishlistCount: number;
   onWishlistClick: () => void;
-  showInstallButton: boolean;
-  onInstallClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onHomeClick, wishlistCount, onWishlistClick, showInstallButton, onInstallClick }) => {
+const Header: React.FC<HeaderProps> = ({ onHomeClick, wishlistCount, onWishlistClick }) => {
   return (
     <header className="bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 max-w-4xl">
@@ -25,18 +22,6 @@ const Header: React.FC<HeaderProps> = ({ onHomeClick, wishlistCount, onWishlistC
             <h1 className="text-xl font-bold tracking-tight text-white">Gadget Guide AI</h1>
           </div>
           <div className="flex items-center gap-3">
-            {showInstallButton && (
-              <Tooltip text="Install app for offline access">
-                <button 
-                  onClick={onInstallClick}
-                  className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900"
-                  aria-label="Install app"
-                >
-                  <DownloadIcon className="w-5 h-5 text-white" />
-                  <span className="hidden sm:block text-sm font-semibold text-white">Install</span>
-                </button>
-              </Tooltip>
-            )}
             <Tooltip text="View your wishlist">
               <button 
                 onClick={onWishlistClick}

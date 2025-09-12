@@ -1,10 +1,13 @@
-import { Category, PriceRange } from './types';
+import { Category, PriceRange, AiModel } from './types';
 import SmartphoneIcon from './components/icons/SmartphoneIcon';
 import WatchIcon from './components/icons/WatchIcon';
 import TvIcon from './components/icons/TvIcon';
 import RefrigeratorIcon from './components/icons/RefrigeratorIcon';
 import WashingMachineIcon from './components/icons/WashingMachineIcon';
 import AcIcon from './components/icons/AcIcon';
+import GeminiIcon from './components/icons/GeminiIcon';
+import PerplexityIcon from './components/icons/PerplexityIcon';
+import ChatGptIcon from './components/icons/ChatGptIcon';
 
 interface CategoryGroup {
   name: string;
@@ -103,4 +106,25 @@ export const PRICE_RANGES: Record<Category['key'], PriceRange[]> = {
     { key: '40000-50000', label: '₹40k - ₹50k' },
     { key: '50000-100000', label: 'Over ₹50k' },
   ],
+};
+
+export const AI_MODELS_INFO: Record<AiModel, { name: string, icon: React.FC<{className?: string}>, color: string, description: string }> = {
+  gemini: {
+    name: 'Gemini AI',
+    icon: GeminiIcon,
+    color: 'text-cyan-400',
+    description: 'Uses Google Search for up-to-date answers.'
+  },
+  perplexity: {
+    name: 'Perplexity AI',
+    icon: PerplexityIcon,
+    color: 'text-blue-400',
+    description: 'Objective, factual answers from search results.'
+  },
+  chatgpt: {
+    name: 'ChatGPT',
+    icon: ChatGptIcon,
+    color: 'text-teal-400',
+    description: 'Conversational style, uses general knowledge.'
+  }
 };

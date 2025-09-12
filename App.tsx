@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { PRICE_RANGES } from './constants';
 import { Category, Product } from './types';
@@ -12,6 +13,7 @@ import SearchHome from './components/SearchHome';
 import { useToast } from './ToastContext';
 import ToastContainer from './components/ToastContainer';
 import ProductModal from './components/ProductModal';
+import InstallPromptBanner from './components/InstallPromptBanner';
 
 // TypeScript definitions for the PWA install prompt event
 declare global {
@@ -49,6 +51,7 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [categoryForModal, setCategoryForModal] = useState<Category | null>(null);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -63,11 +66,16 @@ const App: React.FC = () => {
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setInstallPrompt(e);
+      const dismissed = localStorage.getItem('gadget-guide-install-dismissed');
+      if (!dismissed) {
+        setShowInstallBanner(true);
+      }
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     const handleAppInstalled = () => {
       setInstallPrompt(null);
+      setShowInstallBanner(false);
     };
     window.addEventListener('appinstalled', handleAppInstalled);
 
@@ -92,8 +100,18 @@ const App: React.FC = () => {
       if (choiceResult.outcome === 'accepted') {
         addToast('App installed successfully!', 'info');
       }
+      setShowInstallBanner(false);
       setInstallPrompt(null);
     });
+  };
+  
+  const handleDismissInstallBanner = () => {
+    setShowInstallBanner(false);
+    try {
+      localStorage.setItem('gadget-guide-install-dismissed', 'true');
+    } catch (error) {
+      console.error('Could not save install prompt dismissal to localStorage', error);
+    }
   };
 
   const handleSelectCategory = (category: Category) => {
@@ -200,8 +218,6 @@ const App: React.FC = () => {
         onHomeClick={handleHomeClick}
         wishlistCount={wishlist.length}
         onWishlistClick={() => setIsWishlistModalOpen(true)}
-        showInstallButton={!!installPrompt}
-        onInstallClick={handleInstallClick}
       />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {currentView === 'home' && (
@@ -223,6 +239,13 @@ const App: React.FC = () => {
           />
         )}
       </main>
+
+      {showInstallBanner && (
+        <InstallPromptBanner
+          onInstall={handleInstallClick}
+          onDismiss={handleDismissInstallBanner}
+        />
+      )}
 
       {compareList.length > 0 && (
         <CompareTray

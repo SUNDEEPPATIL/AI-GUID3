@@ -1,31 +1,11 @@
 import React from 'react';
 import { AiModel } from '../types';
-import GeminiIcon from './icons/GeminiIcon';
-import PerplexityIcon from './icons/PerplexityIcon';
-import ChatGptIcon from './icons/ChatGptIcon';
+import { AI_MODELS_INFO } from '../constants';
 
 interface AiSummaryProps {
   summary: string;
   sourceAi: AiModel;
 }
-
-const AI_MODELS_INFO = {
-  gemini: {
-    name: 'Gemini AI',
-    icon: GeminiIcon,
-    color: 'text-cyan-400',
-  },
-  perplexity: {
-    name: 'Perplexity AI',
-    icon: PerplexityIcon,
-    color: 'text-blue-400',
-  },
-  chatgpt: {
-    name: 'ChatGPT',
-    icon: ChatGptIcon,
-    color: 'text-teal-400',
-  }
-};
 
 const AiSummary: React.FC<AiSummaryProps> = ({ summary, sourceAi }) => {
   if (!summary) return null;
