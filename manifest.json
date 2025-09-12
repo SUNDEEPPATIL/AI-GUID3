@@ -8,24 +8,6 @@
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-maskable-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
     }
   ],
   "start_url": ".",
@@ -45,31 +27,7 @@
       "name": "My Wishlist",
       "short_name": "Wishlist",
       "description": "View your saved products",
-      "url": "/?view=wishlist",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/screenshot-1.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Homepage showing product categories."
-    },
-    {
-      "src": "/screenshots/screenshot-2.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Product listing with AI-powered 'Best Value' picks."
-    },
-    {
-      "src": "/screenshots/screenshot-3.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Detailed product comparison view on a tablet."
+      "url": "/?view=wishlist"
     }
   ]
 }
