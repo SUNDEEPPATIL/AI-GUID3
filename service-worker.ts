@@ -69,25 +69,24 @@ sw.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For app shell and other local assets, use a network-first strategy.
+  // For app shell and other local assets, use a Cache-First strategy.
+  // This makes the app load instantly from cache and is great for offline performance.
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request).then((networkResponse) => {
+        // Only cache valid, basic responses to avoid caching errors.
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+        }
         return networkResponse;
-      })
-      .catch(() => {
-        // If the fetch fails (offline), get from the cache.
-        return caches.match(event.request)
-          .then(response => {
-            if (response) return response;
-            // A proper offline page could be returned here if one was cached.
-            // For now, just let the browser handle the network error.
-            throw new Error('Network error and no cache match');
-          });
-      })
+      });
+    })
   );
 });
