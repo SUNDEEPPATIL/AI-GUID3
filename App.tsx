@@ -31,6 +31,9 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+// The period to wait before showing the install banner again after dismissal.
+const INSTALL_BANNER_DISMISSAL_PERIOD = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'home' | 'products'>('home');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -66,16 +69,30 @@ const App: React.FC = () => {
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setInstallPrompt(e);
-      const dismissed = localStorage.getItem('gadget-guide-install-dismissed');
-      if (!dismissed) {
-        setShowInstallBanner(true);
+      
+      const dismissedTimestamp = localStorage.getItem('gadget-guide-install-dismissed-timestamp');
+      if (dismissedTimestamp) {
+        const timeSinceDismissal = Date.now() - parseInt(dismissedTimestamp, 10);
+        if (timeSinceDismissal < INSTALL_BANNER_DISMISSAL_PERIOD) {
+          // It hasn't been long enough, so don't show the banner.
+          return;
+        }
       }
+      
+      // Show the banner if it was never dismissed, or if the dismissal period has passed.
+      setShowInstallBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     const handleAppInstalled = () => {
       setInstallPrompt(null);
       setShowInstallBanner(false);
+      // Clear the dismissal timestamp once the app is installed.
+      try {
+        localStorage.removeItem('gadget-guide-install-dismissed-timestamp');
+      } catch (error) {
+        console.error('Could not remove install dismissal timestamp from localStorage', error);
+      }
     };
     window.addEventListener('appinstalled', handleAppInstalled);
 
@@ -108,7 +125,8 @@ const App: React.FC = () => {
   const handleDismissInstallBanner = () => {
     setShowInstallBanner(false);
     try {
-      localStorage.setItem('gadget-guide-install-dismissed', 'true');
+      // Store a timestamp to temporarily dismiss the banner, making it less intrusive.
+      localStorage.setItem('gadget-guide-install-dismissed-timestamp', Date.now().toString());
     } catch (error) {
       console.error('Could not save install prompt dismissal to localStorage', error);
     }
