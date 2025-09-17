@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Product } from '../types';
 import StarRating from './StarRating';
@@ -28,9 +27,10 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onToggleCompare, isInCompare, compareDisabled, isBestValue, isBestPerformance, onToggleWishlist, isWishlisted, onShare }) => {
-  const price = product.priceInINR || product.expectedPriceInINR;
-  const priceLabel = product.priceInINR ? 'Price' : 'Expected Price';
-  const ariaLabelId = `product-card-title-${product.modelName.replace(/\s+/g, '-')}`;
+  // Defensive coalescing for optional numeric fields
+  const price = (product as any).priceInINR || (product as any).expectedPriceInINR || 0;
+  const priceLabel = (product as any).priceInINR ? 'Price' : 'Expected Price';
+  const ariaLabelId = `product-card-title-${((product as any).modelName || (product as any).id || 'product').toString().replace(/\s+/g, '-')}`;
   
   const borderClass = isBestValue
     ? 'border-amber-400 shadow-2xl shadow-amber-500/10'
@@ -40,10 +40,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
     ? 'border-cyan-500/80 shadow-2xl shadow-cyan-500/10'
     : 'border-gray-700/50 hover:border-cyan-500/50';
 
-  const bestPriceInfo = useMemo(() => findBestRetailerPrice(product.retailerPrices || []), [product.retailerPrices]);
+  const bestPriceInfo = useMemo(() => findBestRetailerPrice((product as any).retailerPrices || []), [(product as any).retailerPrices]);
 
   return (
-    <article aria-labelledby={ariaLabelId} className={`relative bg-gray-800 rounded-xl border overflow-hidden flex flex-col transition-all duration-300 ${borderClass}`}>
+    <article aria-labelledby={ariaLabelId} className={`relative bg-gray-800 rounded-xl border overflow-hidden flex flex-col transition-all duration-300 ${borderClass}`}>  
        {isBestPerformance && (
          <Tooltip text="AI's Best Performance Pick: Top-tier specs and features.">
             <div 
@@ -53,7 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
               Best Performance
             </div>
          </Tooltip>
-      )}
+      )}  
        {isBestValue && (
          <Tooltip text="AI's Best Value Pick: A top combination of high ratings and low price.">
             <div 
@@ -66,17 +66,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
       )}
 
       <div className="p-5 flex-grow pt-10">
-        <h3 className="text-lg font-bold text-white truncate">{product.brand}</h3>
-        <h4 id={ariaLabelId} className="text-md text-gray-300 mb-2 truncate">{product.modelName}</h4>
+        <h3 className="text-lg font-bold text-white truncate">{(product as any).brand}</h3>
+        <h4 id={ariaLabelId} className="text-md text-gray-300 mb-2 truncate">{(product as any).modelName}</h4>
         
         <div className="flex items-center gap-2 mb-3">
-            <StarRating rating={product.reviewStars} />
-            {product.totalReviews && (
-              <span className="text-xs text-gray-400 mt-0.5">({product.totalReviews.toLocaleString()} reviews)</span>
+            <StarRating rating={(product as any).reviewStars} />
+            {(product as any).totalReviews && (
+              <span className="text-xs text-gray-400 mt-0.5">({(product as any).totalReviews.toLocaleString?.() || (product as any).totalReviews} reviews)</span>
             )}
         </div>
 
-        <p className="text-sm text-gray-400 line-clamp-2 mb-4 h-[40px]">{product.summary}</p>
+        <p className="text-sm text-gray-400 line-clamp-2 mb-4 h-[40px]">{(product as any).summary}</p>
         
         <div className="space-y-2 text-sm">
           {price && (
@@ -86,23 +86,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
              </div>
            )}
           
-           {product.launchYear && (
+           {(product as any).launchYear && (
              <div className="flex items-center gap-2 text-gray-300">
                <CalendarIcon className="w-4 h-4 text-cyan-400" />
-               <span>Launched: <span className="font-semibold text-white">{product.launchYear}</span></span>
+               <span>Launched: <span className="font-semibold text-white">{(product as any).launchYear}</span></span>
              </div>
            )}
 
-          {product.expectedLaunch && !product.launchYear && (
+          {(product as any).expectedLaunch && !(product as any).launchYear && (
              <div className="flex items-center gap-2 text-gray-300">
                <CalendarIcon className="w-4 h-4 text-cyan-400" />
-               <span>Launch: <span className="font-semibold text-white">{product.expectedLaunch}</span></span>
+               <span>Launch: <span className="font-semibold text-white">{(product as any).expectedLaunch}</span></span>
              </div>
            )}
 
-          {product.keySpecs && product.keySpecs.length > 0 && (
+          {(product as any).keySpecs && (product as any).keySpecs.length > 0 && (
             <div className="pt-3 mt-3 border-t border-gray-700/50 space-y-1">
-              {product.keySpecs.slice(0, 3).map((spec, index) => (
+              {(product as any).keySpecs.slice(0, 3).map((spec: string, index: number) => (
                 <div key={index} className="flex items-start gap-1.5 truncate">
                   <StarIcon className="w-4 h-4 text-cyan-400/80 flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <span className="text-gray-300">{spec}</span>
@@ -123,7 +123,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
           </button>
         </Tooltip>
         {bestPriceInfo && (
-          <Tooltip text={`Shop on ${bestPriceInfo.retailerName} (best price listed: ${bestPriceInfo.price})`}>
+          <Tooltip text={`Shop on ${bestPriceInfo.retailerName} (best price listed: ${bestPriceInfo.price})`}> 
             <a
               href={createPurchaseLink(bestPriceInfo, product)}
               target="_blank"
@@ -157,7 +157,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
             <HeartIcon className="w-6 h-6" filled={isWishlisted} />
           </button>
         </Tooltip>
-        <Tooltip text={compareDisabled ? "Compare list is full (max 3)" : (isInCompare ? "Remove from compare" : "Add to compare")}>
+        <Tooltip text={compareDisabled ? "Compare list is full (max 3)" : (isInCompare ? "Remove from compare" : "Add to compare")}> 
           <button
             onClick={() => onToggleCompare(product)}
             disabled={compareDisabled}
