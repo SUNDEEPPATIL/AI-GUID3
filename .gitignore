@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Generated JS files from TypeScript compilation
+*.js
+!vite.config.js
+!build.mjs
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
