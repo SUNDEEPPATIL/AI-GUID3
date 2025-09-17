@@ -1,90 +1,36 @@
+/* Basic service worker with safe fetch handler and robust fallbacks */
 
-/// <reference lib="webworker" />
-
-// FIX: Cast `self` to `ServiceWorkerGlobalScope` and assign it to a new constant `sw`.
-// This resolves a "Subsequent variable declarations must have the same type" error
-// that occurs when TypeScript's DOM library (which also defines `self`) is included
-// globally. This ensures `self` is correctly typed for this service worker file,
-// making service worker-specific APIs like `skipWaiting()` and `clients` available.
-const sw = self as unknown as ServiceWorkerGlobalScope;
-
-const CACHE_NAME = 'gadget-guide-ai-v9';
-const APP_SHELL_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-];
-
-// Install: Cache the app shell
-sw.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(APP_SHELL_URLS);
-      })
-      .then(() => sw.skipWaiting())
-  );
+self.addEventListener('install', (event: any) => {
+  // Skip waiting to activate new SW quickly (optional)
+  event.waitUntil((self as any).skipWaiting());
 });
 
-// Activate: Clean up old caches
-sw.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter(cacheName => cacheName !== CACHE_NAME)
-          .map(cacheName => {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    }).then(() => sw.clients.claim())
-  );
+self.addEventListener('activate', (event: any) => {
+  event.waitUntil((self as any).clients.claim());
 });
 
-// Fetch: Serve from cache, fallback to network, and update cache
-sw.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || event.request.url.startsWith('chrome-extension://')) {
-    return;
-  }
-  
-  // For navigation requests, use a network-first strategy.
-  // This ensures users get the latest HTML, which references the new asset files.
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        // If the network fails, serve the cached root page as a fallback.
-        return caches.match('/');
-      })
-    );
-    return;
-  }
-  
-  // For all other requests (assets like JS, CSS, images), use a Cache-First strategy.
-  // Their filenames are hashed, so they are immutable.
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
+self.addEventListener('fetch', (event: any) => {
+  // Ensure event.respondWith always receives a Promise<Response>
+  try {
+    event.respondWith((async () => {
+      try {
+        // Network-first strategy with graceful fallbacks
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.ok) return networkResponse;
+
+        // If network responded but with an error status, return a simple fallback
+        return new Response('Service Unavailable', { status: 503, statusText: 'Service Unavailable' });
+      } catch (err) {
+        // When offline or fetch fails, return an Offline response (could be enhanced to return cached assets)
+        return new Response('Offline', { status: 503, statusText: 'Offline' });
       }
-
-      return fetch(event.request).then((networkResponse) => {
-        // Clone the response because it's a stream and can only be consumed once.
-        const responseToCache = networkResponse.clone();
-        
-        caches.open(CACHE_NAME).then((cache) => {
-          // Only cache valid responses to avoid caching errors.
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, responseToCache);
-          }
-        });
-        
-        return networkResponse;
-      });
-    })
-  );
+    })());
+  } catch (err) {
+    // As a last resort, ensure respondWith is called with a resolved Response
+    try {
+      event.respondWith(Promise.resolve(new Response('Service Worker Error', { status: 500 })));
+    } catch (e) {
+      // no-op: in very rare cases this may still throw, but nothing more we can do here
+    }
+  }
 });
