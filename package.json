@@ -1,3 +1,27 @@
 {
-  "outputDirectory": "dist"
+  "name": "gadget-guide-ai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:sw": "esbuild service-worker.ts --bundle --outfile=dist/service-worker.js --minify",
+    "build:app": "tsc && vite build",
+    "build": "npm run build:app && npm run build:sw",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.19.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.3.1"
+  }
 }
