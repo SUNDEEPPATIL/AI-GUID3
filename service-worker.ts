@@ -8,11 +8,10 @@
 // making service worker-specific APIs like `skipWaiting()` and `clients` available.
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
-const CACHE_NAME = 'gadget-guide-ai-v7';
+const CACHE_NAME = 'gadget-guide-ai-v9';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
-  '/index.js',
   '/manifest.json',
   '/icon.svg',
   '/icons/icon-192.png',
@@ -49,30 +48,24 @@ sw.addEventListener('activate', (event) => {
 
 // Fetch: Serve from cache, fallback to network, and update cache
 sw.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
+  if (event.request.method !== 'GET' || event.request.url.startsWith('chrome-extension://')) {
     return;
   }
   
-  const url = new URL(event.request.url);
-
-  // For cross-origin requests (like from the CDN), use a stale-while-revalidate strategy.
-  if (url.origin === 'https://aistudiocdn.com') {
+  // For navigation requests, use a network-first strategy.
+  // This ensures users get the latest HTML, which references the new asset files.
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          const fetchPromise = fetch(event.request).then((networkResponse) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-          return cachedResponse || fetchPromise;
-        });
+      fetch(event.request).catch(() => {
+        // If the network fails, serve the cached root page as a fallback.
+        return caches.match('/');
       })
     );
     return;
   }
-
-  // For app shell and other local assets, use a Cache-First strategy.
-  // This makes the app load instantly from cache and is great for offline performance.
+  
+  // For all other requests (assets like JS, CSS, images), use a Cache-First strategy.
+  // Their filenames are hashed, so they are immutable.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -80,13 +73,16 @@ sw.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request).then((networkResponse) => {
-        // Only cache valid, basic responses to avoid caching errors.
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-        }
+        // Clone the response because it's a stream and can only be consumed once.
+        const responseToCache = networkResponse.clone();
+        
+        caches.open(CACHE_NAME).then((cache) => {
+          // Only cache valid responses to avoid caching errors.
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, responseToCache);
+          }
+        });
+        
         return networkResponse;
       });
     })
