@@ -97,6 +97,7 @@ const App: React.FC = () => {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
+      // Cleanup: Remove PWA event listeners to prevent memory leaks
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };

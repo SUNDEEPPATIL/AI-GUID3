@@ -31,6 +31,9 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
   const headingId = `product-view-heading-${category.key}`;
 
   useEffect(() => {
+    // Cancellation guard to prevent state updates after unmount or dependency change
+    let isCancelled = false;
+    
     const getProducts = async () => {
       if (!category) return;
 
@@ -41,17 +44,31 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
 
       try {
         const fetchedProducts = await fetchProducts(category, selectedPriceRange);
-        setProducts(fetchedProducts);
-        setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        // Only update state if effect hasn't been cancelled
+        if (!isCancelled) {
+          setProducts(fetchedProducts);
+          setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        }
       } catch (err: any) {
-        addToast(err.message, 'error');
-        setAnnouncement(`Error loading products. ${err.message}`);
+        // Only update state if effect hasn't been cancelled
+        if (!isCancelled) {
+          addToast(err.message, 'error');
+          setAnnouncement(`Error loading products. ${err.message}`);
+        }
       } finally {
-        setIsLoading(false);
+        // Only update loading state if effect hasn't been cancelled
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     getProducts();
+    
+    // Cleanup function to set cancellation flag
+    return () => {
+      isCancelled = true;
+    };
   }, [category, selectedPriceRange, addToast]);
 
   const bestValueProduct = useMemo(() => findBestValueProduct(products), [products]);

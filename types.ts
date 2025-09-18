@@ -47,7 +47,7 @@ export interface Product {
   keySpecs?: string[];
   reviewAnalysis?: string;
   geminiSuggestion?: GeminiSuggestion;
-  userReviews: UserReview[];
+  userReviews?: UserReview[]; // Optional as not all products may have user reviews from API
   retailerPrices?: RetailerPrice[];
   // Gadget-specific fields
   antutuScore?: number;
