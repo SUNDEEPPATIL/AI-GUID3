@@ -172,7 +172,7 @@ export const fetchProducts = async (category: Category, priceRange?: PriceRange)
       },
     });
 
-    const jsonText = response.text.trim();
+    const jsonText = response.text?.trim() || '';
     if (!jsonText) {
       throw new Error("The AI model returned an empty response. Please try a different category or price range.");
     }
@@ -195,7 +195,10 @@ export const fetchProductAnalysis = async (product: Product): Promise<{ reviewAn
         responseSchema: productAnalysisSchema,
       },
     });
-    const jsonText = response.text.trim();
+    const jsonText = response.text?.trim() || '';
+    if (!jsonText) {
+      throw new Error("The AI model returned an empty response for product analysis.");
+    }
     return JSON.parse(jsonText);
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
@@ -212,7 +215,7 @@ export const compareProducts = async (products: Product[]): Promise<string> => {
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return response.text;
+    return response.text || 'No comparison generated.';
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
   }
@@ -251,7 +254,7 @@ export const search = async (query: string, model: AiModel): Promise<SearchResul
       config: config,
     });
     
-    const summary = response.text;
+    const summary = response.text || 'No summary generated.';
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
 
     return { summary, sources, sourceAi: model };
