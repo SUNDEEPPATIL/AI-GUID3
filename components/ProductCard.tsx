@@ -70,7 +70,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails, onTog
         <h4 id={ariaLabelId} className="text-md text-gray-300 mb-2 truncate">{product.modelName}</h4>
         
         <div className="flex items-center gap-2 mb-3">
-            <StarRating rating={product.reviewStars} />
+            {/* FIX: Provide a fallback value of 0 to satisfy the StarRating component's 'rating: number' prop type. */}
+            <StarRating rating={product.reviewStars || 0} />
             {product.totalReviews && (
               <span className="text-xs text-gray-400 mt-0.5">({product.totalReviews.toLocaleString()} reviews)</span>
             )}

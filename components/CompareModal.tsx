@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useRef } from 'react';
 import { Product } from '../types';
 import StarRating from './StarRating';
@@ -47,7 +48,8 @@ const CompareModal: React.FC<CompareModalProps> = ({ products, onClose, comparis
   const getFeatureValue = (product: Product, key: string) => {
     switch (key) {
       case 'reviewStars':
-        return <StarRating rating={product.reviewStars} />;
+        // FIX: Provide a fallback value of 0 to satisfy the StarRating component's 'rating: number' prop type.
+        return <StarRating rating={product.reviewStars || 0} />;
       case 'bestPrice': {
         const bestPrice = findBestRetailerPrice(product.retailerPrices || []);
         if (bestPrice) {

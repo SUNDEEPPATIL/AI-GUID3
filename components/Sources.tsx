@@ -1,5 +1,6 @@
 
 
+
 import React from 'react';
 import { GroundingChunk } from '../types';
 import LinkIcon from './icons/LinkIcon';
@@ -26,14 +27,15 @@ const Sources: React.FC<SourcesProps> = ({ sources }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {validSources.map((source, index) => (
           <Tooltip key={index} text="Opens source in a new tab">
+            {/* FIX: Use non-null assertions (!) as the filter above guarantees .web, .uri, and .title exist. */}
             <a
-              href={source.web.uri}
+              href={source.web!.uri!}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-gray-700/80 transition-colors"
             >
-              <p className="text-sm font-medium text-cyan-400 truncate">{source.web.title}</p>
-              <p className="text-xs text-gray-500 truncate">{source.web.uri}</p>
+              <p className="text-sm font-medium text-cyan-400 truncate">{source.web!.title!}</p>
+              <p className="text-xs text-gray-500 truncate">{source.web!.uri!}</p>
             </a>
           </Tooltip>
         ))}

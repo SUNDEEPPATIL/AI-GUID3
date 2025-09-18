@@ -1,5 +1,6 @@
 
 
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Product, GeminiSuggestion, RetailerPrice, Category } from '../types';
 import { fetchProductAnalysis } from '../services/geminiService';
@@ -149,7 +150,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, category, onClose,
           <div>
             <h2 id="product-modal-title" className="text-xl font-bold text-white">{product.brand} {product.modelName}</h2>
             <div className="flex items-center gap-3 mt-1">
-              <StarRating rating={product.reviewStars} />
+              {/* FIX: Provide a fallback value of 0 to satisfy the StarRating component's 'rating: number' prop type. */}
+              <StarRating rating={product.reviewStars || 0} />
               {product.totalReviews && <span className="text-xs text-gray-400">({product.totalReviews.toLocaleString()} reviews)</span>}
             </div>
           </div>

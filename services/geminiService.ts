@@ -2,6 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category, PriceRange, Product, SearchResult, AiModel, GeminiSuggestion } from '../types';
 
+// FIX: Declare the process object to satisfy TypeScript in a browser environment.
+// The build environment is expected to provide this global variable.
+declare const process: {
+  env: {
+    API_KEY: string;
+  };
+};
+
 // Assumes the API key is set in the environment variables.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
@@ -155,7 +163,8 @@ export const fetchProducts = async (category: Category, priceRange?: PriceRange)
       },
     });
 
-    const jsonText = response.text.trim();
+    // FIX: Use nullish coalescing to handle cases where response.text might be undefined.
+    const jsonText = (response.text ?? '').trim();
     if (!jsonText) {
       throw new Error("The AI model returned an empty response. Please try a different category or price range.");
     }
@@ -178,7 +187,8 @@ export const fetchProductAnalysis = async (product: Product): Promise<{ reviewAn
         responseSchema: productAnalysisSchema,
       },
     });
-    const jsonText = response.text.trim();
+    // FIX: Use nullish coalescing to handle cases where response.text might be undefined.
+    const jsonText = (response.text ?? '').trim();
     return JSON.parse(jsonText);
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
@@ -195,7 +205,8 @@ export const compareProducts = async (products: Product[]): Promise<string> => {
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return response.text;
+    // FIX: Handle potentially undefined response.text and ensure a string is always returned.
+    return response.text ?? 'Sorry, the AI could not generate a comparison.';
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
   }
@@ -234,7 +245,8 @@ export const search = async (query: string, model: AiModel): Promise<SearchResul
       config: config,
     });
     
-    const summary = response.text;
+    // FIX: Handle potentially undefined response.text to ensure summary is always a string.
+    const summary = response.text ?? '';
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
 
     return { summary, sources, sourceAi: model };

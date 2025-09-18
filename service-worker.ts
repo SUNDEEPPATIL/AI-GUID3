@@ -1,4 +1,5 @@
 
+
 /// <reference lib="webworker" />
 
 // FIX: Cast `self` to `ServiceWorkerGlobalScope` and assign it to a new constant `sw`.
@@ -56,9 +57,12 @@ sw.addEventListener('fetch', (event) => {
   // This ensures users get the latest HTML, which references the new asset files.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
+      fetch(event.request).catch(async () => {
         // If the network fails, serve the cached root page as a fallback.
-        return caches.match('/');
+        const cachedResponse = await caches.match('/');
+        // FIX: Use a non-null assertion here. Since '/' is part of the cached app shell,
+        // we can be certain it exists, resolving the `Response | undefined` type issue.
+        return cachedResponse!;
       })
     );
     return;
