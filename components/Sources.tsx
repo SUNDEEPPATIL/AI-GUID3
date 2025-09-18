@@ -27,13 +27,13 @@ const Sources: React.FC<SourcesProps> = ({ sources }) => {
         {validSources.map((source, index) => (
           <Tooltip key={index} text="Opens source in a new tab">
             <a
-              href={source.web.uri}
+              href={source.web!.uri}
               target="_blank"
               rel="noopener noreferrer"
               className="block p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-gray-700/80 transition-colors"
             >
-              <p className="text-sm font-medium text-cyan-400 truncate">{source.web.title}</p>
-              <p className="text-xs text-gray-500 truncate">{source.web.uri}</p>
+              <p className="text-sm font-medium text-cyan-400 truncate">{source.web!.title}</p>
+              <p className="text-xs text-gray-500 truncate">{source.web!.uri}</p>
             </a>
           </Tooltip>
         ))}
