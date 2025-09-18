@@ -96,6 +96,7 @@ const App: React.FC = () => {
     };
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Explicit cleanup for beforeinstallprompt and appinstalled listeners (prevents memory leaks)
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);

@@ -2,8 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category, PriceRange, Product, SearchResult, AiModel, GeminiSuggestion } from '../types';
 
-// Assumes the API key is set in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Environment key fallback: prefer GEMINI_API_KEY, fallback to API_KEY
+// Console warning emitted if neither is set
+const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+if (!apiKey) {
+  console.warn('Warning: Neither GEMINI_API_KEY nor API_KEY environment variables are set. API calls will fail.');
+}
+// Instantiate client with empty string if missing to preserve existing error paths
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 const userReviewSchema = {
   type: Type.OBJECT,
