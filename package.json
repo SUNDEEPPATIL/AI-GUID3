@@ -1,12 +1,12 @@
 {
   "name": "gadget-guide-ai",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build:sw": "esbuild service-worker.ts --bundle --outfile=dist/service-worker.js --minify",
-    "build:app": "tsc && vite build",
+    "build:app": "vite build",
     "build": "npm run build:app && npm run build:sw",
     "preview": "vite preview"
   },

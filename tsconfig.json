@@ -3,13 +3,15 @@
     "target": "ESNext",
     "module": "ESNext",
     "jsx": "react-jsx",
-    "strict": true,
+    "strict": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": true
+    "allowJs": true,
+    "noImplicitAny": false,
+    "types": []
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

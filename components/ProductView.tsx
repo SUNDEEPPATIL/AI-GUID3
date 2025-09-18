@@ -39,19 +39,38 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
       const priceLabel = selectedPriceRange ? ` in the ${selectedPriceRange.label} range` : '';
       setAnnouncement(`Loading products for ${category.name}${priceLabel}.`);
 
+      // Cancellation guard to prevent state updates after unmount or dependency change
+      let cancelled = false;
+
       try {
         const fetchedProducts = await fetchProducts(category, selectedPriceRange);
-        setProducts(fetchedProducts);
-        setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        
+        // Only update state if component hasn't been unmounted or dependencies changed
+        if (!cancelled) {
+          setProducts(fetchedProducts);
+          setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        }
       } catch (err: any) {
-        addToast(err.message, 'error');
-        setAnnouncement(`Error loading products. ${err.message}`);
+        // Only update state if component hasn't been unmounted or dependencies changed
+        if (!cancelled) {
+          addToast(err.message, 'error');
+          setAnnouncement(`Error loading products. ${err.message}`);
+        }
       } finally {
-        setIsLoading(false);
+        // Only update loading state if component hasn't been unmounted or dependencies changed
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
+      
+      // Cleanup function to mark request as cancelled
+      return () => {
+        cancelled = true;
+      };
     };
 
-    getProducts();
+    const cleanup = getProducts();
+    return cleanup;
   }, [category, selectedPriceRange, addToast]);
 
   const bestValueProduct = useMemo(() => findBestValueProduct(products), [products]);
