@@ -127,7 +127,14 @@ export const createPurchaseLink = (retailer: RetailerPrice, product: Product): s
   
   try {
     const urlObject = new URL(targetUrl);
-    const retailerConfig = AFFILIATE_RETAILERS.find(r => urlObject.hostname.includes(r.hostname));
+    // Hostname hardening: normalize hostname (lowercase, strip leading www) for security
+    const normalizedHostname = urlObject.hostname.toLowerCase().replace(/^www\./, '');
+    
+    // Security: only allow exact match or subdomain match against known retailer hostnames
+    const retailerConfig = AFFILIATE_RETAILERS.find(r => {
+      const configHostname = r.hostname.toLowerCase();
+      return normalizedHostname === configHostname || normalizedHostname.endsWith('.' + configHostname);
+    });
     
     // 3. Check if the retailer is supported and if the URL is a valid product page
     if (retailerConfig && retailerConfig.isProductPage(urlObject)) {

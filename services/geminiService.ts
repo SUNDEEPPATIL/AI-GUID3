@@ -2,8 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category, PriceRange, Product, SearchResult, AiModel, GeminiSuggestion } from '../types';
 
-// Assumes the API key is set in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Environment variable fallback: prefer GEMINI_API_KEY, fallback to legacy API_KEY
+// Using import.meta.env for Vite compatibility in browser environment
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+if (!apiKey) {
+  console.warn('Neither VITE_GEMINI_API_KEY nor VITE_API_KEY environment variable is set. API calls may fail.');
+}
+// Instantiate with empty string if missing to preserve existing error handling path
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 const userReviewSchema = {
   type: Type.OBJECT,
@@ -46,7 +52,7 @@ const productSchema = {
     userReviews: {
       type: Type.ARRAY,
       items: userReviewSchema,
-      description: "A list of 2-3 sample user reviews for the product, ensuring variety in opinion. For upcoming phones, this can be based on expert opinions or omitted."
+      description: "A list of 2-3 sample user reviews for the product, ensuring variety in opinion. For upcoming phones, this can be based on expert opinions or omitted. Optional - AI may or may not return this field."
     },
     retailerPrices: {
       type: Type.ARRAY,

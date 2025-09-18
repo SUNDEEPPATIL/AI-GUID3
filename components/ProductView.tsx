@@ -31,6 +31,9 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
   const headingId = `product-view-heading-${category.key}`;
 
   useEffect(() => {
+    // Cancellation guard to avoid state updates after unmount or dependency changes
+    let cancelled = false;
+    
     const getProducts = async () => {
       if (!category) return;
 
@@ -41,17 +44,30 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
 
       try {
         const fetchedProducts = await fetchProducts(category, selectedPriceRange);
-        setProducts(fetchedProducts);
-        setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        
+        // Guard against state updates if component unmounted or dependencies changed
+        if (!cancelled) {
+          setProducts(fetchedProducts);
+          setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        }
       } catch (err: any) {
-        addToast(err.message, 'error');
-        setAnnouncement(`Error loading products. ${err.message}`);
+        if (!cancelled) {
+          addToast(err.message, 'error');
+          setAnnouncement(`Error loading products. ${err.message}`);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     getProducts();
+    
+    // Cleanup function to cancel ongoing requests
+    return () => {
+      cancelled = true;
+    };
   }, [category, selectedPriceRange, addToast]);
 
   const bestValueProduct = useMemo(() => findBestValueProduct(products), [products]);
