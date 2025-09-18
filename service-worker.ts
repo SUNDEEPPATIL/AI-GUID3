@@ -56,9 +56,10 @@ sw.addEventListener('fetch', (event) => {
   // This ensures users get the latest HTML, which references the new asset files.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
+      fetch(event.request).catch(async () => {
         // If the network fails, serve the cached root page as a fallback.
-        return caches.match('/');
+        const cachedResponse = await caches.match('/');
+        return cachedResponse || new Response('Offline', { status: 503 });
       })
     );
     return;

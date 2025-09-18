@@ -51,7 +51,40 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
       }
     };
 
-    getProducts();
+    // Added cancellation guard to avoid setState after unmount/dependency changes (prevents React warnings)
+    let isCancelled = false;
+    
+    const fetchWithCancellation = async () => {
+      if (!category) return;
+
+      setIsLoading(true);
+      setProducts([]);
+      const priceLabel = selectedPriceRange ? ` in the ${selectedPriceRange.label} range` : '';
+      setAnnouncement(`Loading products for ${category.name}${priceLabel}.`);
+
+      try {
+        const fetchedProducts = await fetchProducts(category, selectedPriceRange);
+        if (!isCancelled) {
+          setProducts(fetchedProducts);
+          setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        }
+      } catch (err: any) {
+        if (!isCancelled) {
+          addToast(err.message, 'error');
+          setAnnouncement(`Error loading products. ${err.message}`);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchWithCancellation();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [category, selectedPriceRange, addToast]);
 
   const bestValueProduct = useMemo(() => findBestValueProduct(products), [products]);

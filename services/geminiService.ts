@@ -2,8 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category, PriceRange, Product, SearchResult, AiModel, GeminiSuggestion } from '../types';
 
-// Assumes the API key is set in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Environment key fallback: prefer GEMINI_API_KEY, fallback to API_KEY
+// Console warning emitted if neither is set
+const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+if (!apiKey) {
+  console.warn('Warning: Neither GEMINI_API_KEY nor API_KEY environment variables are set. API calls will fail.');
+}
+// Instantiate client with empty string if missing to preserve existing error paths
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 const userReviewSchema = {
   type: Type.OBJECT,
@@ -155,7 +161,7 @@ export const fetchProducts = async (category: Category, priceRange?: PriceRange)
       },
     });
 
-    const jsonText = response.text.trim();
+    const jsonText = response.text?.trim() || '';
     if (!jsonText) {
       throw new Error("The AI model returned an empty response. Please try a different category or price range.");
     }
@@ -178,7 +184,10 @@ export const fetchProductAnalysis = async (product: Product): Promise<{ reviewAn
         responseSchema: productAnalysisSchema,
       },
     });
-    const jsonText = response.text.trim();
+    const jsonText = response.text?.trim() || '';
+    if (!jsonText) {
+      throw new Error("The AI model returned an empty response.");
+    }
     return JSON.parse(jsonText);
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
@@ -195,7 +204,7 @@ export const compareProducts = async (products: Product[]): Promise<string> => {
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-    return response.text;
+    return response.text || '';
   } catch (error) {
     throw new Error(getApiErrorMessage(error));
   }
@@ -234,7 +243,7 @@ export const search = async (query: string, model: AiModel): Promise<SearchResul
       config: config,
     });
     
-    const summary = response.text;
+    const summary = response.text || '';
     const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
 
     return { summary, sources, sourceAi: model };
