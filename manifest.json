@@ -39,6 +39,13 @@
       "type": "image/png",
       "form_factor": "wide",
       "label": "Gadget Guide AI home screen for search and category selection"
+    },
+    {
+      "src": "/screenshots/screenshot2.svg",
+      "sizes": "540x960",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "A placeholder screenshot for mobile devices"
     }
   ],
   "shortcuts": [

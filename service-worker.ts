@@ -7,7 +7,7 @@
 // making service worker-specific APIs like `skipWaiting()` and `clients` available.
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
-const CACHE_NAME = 'gadget-guide-ai-v10';
+const CACHE_NAME = 'gadget-guide-ai-v11';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
@@ -16,6 +16,7 @@ const APP_SHELL_URLS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/screenshots/screenshot1.png',
+  '/screenshots/screenshot2.svg',
 ];
 
 // Install: Cache the app shell
