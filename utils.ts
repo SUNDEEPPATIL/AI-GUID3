@@ -127,9 +127,16 @@ export const createPurchaseLink = (retailer: RetailerPrice, product: Product): s
   
   try {
     const urlObject = new URL(targetUrl);
-    const retailerConfig = AFFILIATE_RETAILERS.find(r => urlObject.hostname.includes(r.hostname));
+    // Security: Normalize hostname for comparison (lowercase, strip www)
+    const normalizedHost = urlObject.hostname.toLowerCase().replace(/^www\./, '');
+    const retailerConfig = AFFILIATE_RETAILERS.find(r => {
+      const normalizedRetailerHost = r.hostname.toLowerCase().replace(/^www\./, '');
+      // Require exact match or subdomain of retailerConfig.hostname for security
+      return normalizedHost === normalizedRetailerHost || normalizedHost.endsWith('.' + normalizedRetailerHost);
+    });
     
     // 3. Check if the retailer is supported and if the URL is a valid product page
+    // Only wrap if both hostname matches and isProductPage returns true for security
     if (retailerConfig && retailerConfig.isProductPage(urlObject)) {
       const encodedUrl = encodeURIComponent(targetUrl);
       return `https://cashkaro.com/stores/${retailerConfig.slug}?u=${CASHKARO_USER_ID}&url=${encodedUrl}`;
