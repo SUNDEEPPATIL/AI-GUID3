@@ -4,7 +4,7 @@ import StarIconHalf from './icons/StarIconHalf';
 import StarIconEmpty from './icons/StarIconEmpty';
 
 interface StarRatingProps {
-  rating: number;
+  rating?: number; // Made optional to handle cases where reviewStars might be undefined
   maxRating?: number;
 }
 

@@ -127,7 +127,11 @@ export const createPurchaseLink = (retailer: RetailerPrice, product: Product): s
   
   try {
     const urlObject = new URL(targetUrl);
-    const retailerConfig = AFFILIATE_RETAILERS.find(r => urlObject.hostname.includes(r.hostname));
+    // Normalize hostname for security - use exact match or endsWith for better security
+    const normalizedHostname = urlObject.hostname.toLowerCase();
+    const retailerConfig = AFFILIATE_RETAILERS.find(r => 
+      normalizedHostname === r.hostname || normalizedHostname.endsWith('.' + r.hostname)
+    );
     
     // 3. Check if the retailer is supported and if the URL is a valid product page
     if (retailerConfig && retailerConfig.isProductPage(urlObject)) {

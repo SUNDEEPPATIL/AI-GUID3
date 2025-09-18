@@ -58,7 +58,7 @@ sw.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request).catch(() => {
         // If the network fails, serve the cached root page as a fallback.
-        return caches.match('/');
+        return caches.match('/').then(response => response || new Response('Offline', { status: 503 }));
       })
     );
     return;
