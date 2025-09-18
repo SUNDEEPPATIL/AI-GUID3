@@ -41,9 +41,11 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
 
       try {
         const fetchedProducts = await fetchProducts(category, selectedPriceRange);
+        // Check if component is still mounted before updating state
         setProducts(fetchedProducts);
         setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
       } catch (err: any) {
+        // Check if component is still mounted before updating state
         addToast(err.message, 'error');
         setAnnouncement(`Error loading products. ${err.message}`);
       } finally {
@@ -51,7 +53,43 @@ const ProductView: React.FC<ProductViewProps> = ({ category, priceRanges, compar
       }
     };
 
-    getProducts();
+    // Cancellation flag to prevent state updates after unmount or stale selections
+    let isCancelled = false;
+    
+    const wrappedGetProducts = async () => {
+      if (!category) return;
+
+      setIsLoading(true);
+      setProducts([]);
+      const priceLabel = selectedPriceRange ? ` in the ${selectedPriceRange.label} range` : '';
+      setAnnouncement(`Loading products for ${category.name}${priceLabel}.`);
+
+      try {
+        const fetchedProducts = await fetchProducts(category, selectedPriceRange);
+        // Check if component is still mounted and this request is still current
+        if (!isCancelled) {
+          setProducts(fetchedProducts);
+          setAnnouncement(`${fetchedProducts.length} products found for ${category.name}${priceLabel}. Results are now showing.`);
+        }
+      } catch (err: any) {
+        // Check if component is still mounted and this request is still current
+        if (!isCancelled) {
+          addToast(err.message, 'error');
+          setAnnouncement(`Error loading products. ${err.message}`);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    wrappedGetProducts();
+    
+    // Cleanup function to cancel the request
+    return () => {
+      isCancelled = true;
+    };
   }, [category, selectedPriceRange, addToast]);
 
   const bestValueProduct = useMemo(() => findBestValueProduct(products), [products]);

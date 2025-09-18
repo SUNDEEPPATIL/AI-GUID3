@@ -1,9 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React from 'react';
-import MobileSignalIcon from './icons/MobileSignalIcon';
-import HeartIcon from './icons/HeartIcon';
-import Tooltip from './Tooltip';
-const Header = ({ onHomeClick, wishlistCount, onWishlistClick }) => {
-    return (_jsx("header", { className: "bg-gray-800/50 backdrop-blur-sm sticky top-0 z-10", children: _jsx("div", { className: "container mx-auto px-4 py-3 max-w-4xl", children: _jsxs("div", { className: "flex justify-between items-center", children: [_jsxs("div", { className: "flex items-center gap-2 cursor-pointer", onClick: onHomeClick, children: [_jsx(MobileSignalIcon, { className: "w-8 h-8 text-cyan-400" }), _jsx("h1", { className: "text-xl font-bold tracking-tight text-white", children: "Gadget Guide AI" })] }), _jsx("div", { className: "flex items-center gap-3", children: _jsx(Tooltip, { text: "View your wishlist", children: _jsxs("button", { onClick: onWishlistClick, className: "relative flex items-center gap-2 px-3 py-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-900", "aria-label": `View wishlist with ${wishlistCount} items`, children: [_jsx(HeartIcon, { className: "w-5 h-5 text-pink-400" }), _jsx("span", { className: "hidden sm:block text-sm font-semibold text-white", children: "Wishlist" }), wishlistCount > 0 && (_jsx("span", { className: "absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 bg-pink-500 text-white text-xs font-bold rounded-full", children: wishlistCount }))] }) }) })] }) }) }));
-};
-export default Header;
