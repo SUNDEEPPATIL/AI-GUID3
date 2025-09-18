@@ -1,0 +1,20 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React, { useRef } from 'react';
+import HeartIcon from './icons/HeartIcon';
+import ScaleIcon from './icons/ScaleIcon';
+import RupeeIcon from './icons/RupeeIcon';
+import Tooltip from './Tooltip';
+import { useAccessibilityModal } from '../hooks/useAccessibilityModal';
+const WishlistModal = ({ items, onClose, onToggleWishlist, onToggleCompare, compareList, compareDisabled }) => {
+    const modalRef = useRef(null);
+    useAccessibilityModal(onClose, modalRef);
+    return (_jsx("div", { className: "fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4", onClick: onClose, children: _jsxs("div", { ref: modalRef, role: "dialog", "aria-modal": "true", "aria-labelledby": "wishlist-modal-title", className: "bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-700/50 shadow-2xl shadow-pink-500/10", onClick: (e) => e.stopPropagation(), children: [_jsxs("header", { className: "sticky top-0 bg-gray-800/80 backdrop-blur-sm z-10 p-4 border-b border-gray-700 flex justify-between items-center", children: [_jsxs("div", { className: "flex items-center gap-3", children: [_jsx(HeartIcon, { className: "w-7 h-7 text-pink-400" }), _jsx("h2", { id: "wishlist-modal-title", className: "text-xl font-bold text-white", children: "My Wishlist" })] }), _jsx(Tooltip, { text: "Close wishlist", children: _jsx("button", { onClick: onClose, className: "text-gray-400 hover:text-white transition-colors text-3xl leading-none", "aria-label": "Close modal", children: "\u00D7" }) })] }), _jsx("div", { className: "p-6 overflow-y-auto", children: items.length > 0 ? (_jsx("ul", { className: "space-y-4", children: items.map(product => {
+                            const isInCompare = compareList.some(p => p.modelName === product.modelName);
+                            const isCompareDisabled = compareDisabled && !isInCompare;
+                            const price = product.priceInINR || product.expectedPriceInINR;
+                            return (_jsxs("li", { className: "flex items-center justify-between bg-gray-900/50 p-4 rounded-lg border border-gray-700/50", children: [_jsxs("div", { children: [_jsxs("h3", { className: "font-bold text-white", children: [product.brand, " ", product.modelName] }), price && (_jsxs("div", { className: "flex items-center gap-2 text-sm text-gray-400 mt-1", children: [_jsx(RupeeIcon, { className: "w-4 h-4" }), _jsx("span", { children: price })] }))] }), _jsxs("div", { className: "flex items-center gap-2", children: [_jsx(Tooltip, { text: isCompareDisabled ? "Compare list is full" : (isInCompare ? "Remove from compare" : "Add to compare"), children: _jsx("button", { onClick: () => onToggleCompare(product), disabled: isCompareDisabled, className: `p-2 rounded-lg transition-colors duration-200 ${isInCompare
+                                                        ? 'bg-cyan-500/20 text-cyan-300'
+                                                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'} ${isCompareDisabled ? 'opacity-50 cursor-not-allowed' : ''}`, "aria-label": isInCompare ? "Remove from compare" : "Add to compare", children: _jsx(ScaleIcon, { className: "w-5 h-5" }) }) }), _jsx(Tooltip, { text: "Remove from wishlist", children: _jsx("button", { onClick: () => onToggleWishlist(product), className: "p-2 rounded-lg bg-gray-700 hover:bg-red-500/20 text-gray-300 hover:text-red-400 transition-colors duration-200", "aria-label": "Remove from wishlist", children: _jsx(HeartIcon, { className: "w-5 h-5", filled: true }) }) })] })] }, product.modelName));
+                        }) })) : (_jsxs("div", { className: "text-center py-16", children: [_jsx(HeartIcon, { className: "w-16 h-16 text-gray-600 mx-auto mb-4" }), _jsx("h3", { className: "text-xl font-bold text-white", children: "Your Wishlist is Empty" }), _jsx("p", { className: "text-gray-400 mt-2", children: "Click the heart icon on any product to save it here for later." })] })) })] }) }));
+};
+export default WishlistModal;
