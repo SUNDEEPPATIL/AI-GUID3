@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Compiled JavaScript files from TypeScript (we use TypeScript sources)
+# Allow specific config files that should be JS
+*.js
+!vite.config.js
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

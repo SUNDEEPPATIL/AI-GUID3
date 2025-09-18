@@ -3,9 +3,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Category, PriceRange, Product, SearchResult, AiModel, GeminiSuggestion } from '../types';
 
 // Environment variable fallback: prefer GEMINI_API_KEY, fallback to legacy API_KEY
-const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+// Using import.meta.env for Vite compatibility in browser environment
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
 if (!apiKey) {
-  console.warn('Neither GEMINI_API_KEY nor API_KEY environment variable is set. API calls may fail.');
+  console.warn('Neither VITE_GEMINI_API_KEY nor VITE_API_KEY environment variable is set. API calls may fail.');
 }
 // Instantiate with empty string if missing to preserve existing error handling path
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
