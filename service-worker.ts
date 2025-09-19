@@ -13,8 +13,6 @@ const APP_SHELL_URLS = [
   '/index.html',
   '/manifest.json',
   '/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
   '/screenshots/screenshot-mobile.png',
   '/screenshots/screenshot-desktop.png',
 ];
