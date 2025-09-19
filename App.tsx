@@ -55,6 +55,7 @@ const App: React.FC = () => {
   const [categoryForModal, setCategoryForModal] = useState<Category | null>(null);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [initialSearchQuery, setInitialSearchQuery] = useState('');
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -103,10 +104,19 @@ const App: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    // Handle app shortcut to open wishlist
+    // Handle app shortcuts and incoming shared text
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('view') === 'wishlist') {
       setIsWishlistModalOpen(true);
+    }
+    const sharedText = urlParams.get('shared_text');
+    if (sharedText) {
+        setInitialSearchQuery(sharedText);
+        // Clean up the URL so it doesn't re-trigger on reload
+        urlParams.delete('shared_text');
+        const newSearch = urlParams.toString();
+        const newPath = newSearch ? `${window.location.pathname}?${newSearch}` : window.location.pathname;
+        window.history.replaceState({}, '', newPath);
     }
   }, []);
 
@@ -241,6 +251,7 @@ const App: React.FC = () => {
         {currentView === 'home' && (
           <SearchHome 
             onCategorySelect={handleSelectCategory}
+            initialQuery={initialSearchQuery}
           />
         )}
         {currentView === 'products' && selectedCategory && (

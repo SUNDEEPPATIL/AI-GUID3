@@ -5,6 +5,11 @@
   "start_url": "/",
   "id": "/",
   "display": "standalone",
+  "display_override": [
+    "tabbed",
+    "window-controls-overlay",
+    "standalone"
+  ],
   "background_color": "#1f2937",
   "theme_color": "#1f2937",
   "scope": "/",
@@ -55,5 +60,26 @@
       "description": "See your saved products",
       "url": "/?view=wishlist"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "text": "shared_text"
+    }
+  },
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.example.gadgetguide",
+      "url": "https://play.google.com/store/apps/details?id=com.example.gadgetguide"
+    }
+  ],
+  "prefer_related_applications": true,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
 }

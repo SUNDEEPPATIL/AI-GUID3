@@ -7,7 +7,7 @@
 // making service worker-specific APIs like `skipWaiting()` and `clients` available.
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
-const CACHE_NAME = 'gadget-guide-ai-v11';
+const CACHE_NAME = 'gadget-guide-ai-v12';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
@@ -49,15 +49,37 @@ sw.addEventListener('activate', (event) => {
 
 // Fetch: Serve from cache, fallback to network, and update cache
 sw.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || event.request.url.startsWith('chrome-extension://')) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Ignore requests that are not GET or POST, and ignore chrome-extension URLs
+  if (!['GET', 'POST'].includes(request.method) || url.protocol === 'chrome-extension:') {
     return;
   }
   
-  // For navigation requests, use a network-first strategy.
-  // This ensures users get the latest HTML, which references the new asset files.
-  if (event.request.mode === 'navigate') {
+  // API requests to Google GenAI: use a stale-while-revalidate strategy.
+  // This serves content from cache immediately for speed and offline access,
+  // then updates the cache in the background with a fresh network request.
+  if (url.hostname.includes('googleapis.com')) {
     event.respondWith(
-      fetch(event.request).catch(async () => {
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(request).then(cachedResponse => {
+          const fetchPromise = fetch(request).then(networkResponse => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          });
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Navigation requests: use a network-first strategy.
+  // This ensures users get the latest HTML.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
         // If the network fails, serve the cached root page as a fallback.
         const cachedResponse = await caches.match('/');
         // FIX: Use a non-null assertion here. Since '/' is part of the cached app shell,
@@ -68,27 +90,28 @@ sw.addEventListener('fetch', (event) => {
     return;
   }
   
-  // For all other requests (assets like JS, CSS, images), use a Cache-First strategy.
-  // Their filenames are hashed, so they are immutable.
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request).then((networkResponse) => {
-        // Clone the response because it's a stream and can only be consumed once.
-        const responseToCache = networkResponse.clone();
-        
-        caches.open(CACHE_NAME).then((cache) => {
-          // Only cache valid responses to avoid caching errors.
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, responseToCache);
+  // For all other GET requests (assets like JS, CSS, images), use a Cache-First strategy.
+  // This is efficient as assets are typically versioned by the build process.
+  if (request.method === 'GET') {
+      event.respondWith(
+        caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
           }
-        });
-        
-        return networkResponse;
-      });
-    })
-  );
+
+          return fetch(request).then((networkResponse) => {
+            const responseToCache = networkResponse.clone();
+            
+            caches.open(CACHE_NAME).then((cache) => {
+              // Only cache valid responses to avoid caching errors.
+              if (networkResponse && networkResponse.status === 200) {
+                cache.put(request, responseToCache);
+              }
+            });
+            
+            return networkResponse;
+          });
+        })
+      );
+  }
 });

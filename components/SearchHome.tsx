@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CATEGORY_GROUPS, AI_MODELS_INFO } from '../constants';
 import { Category, SearchResult, AiModel } from '../types';
 import CategorySelector from './CategorySelector';
@@ -13,6 +13,7 @@ import BrainIcon from './icons/BrainIcon';
 
 interface SearchHomeProps {
   onCategorySelect: (category: Category) => void;
+  initialQuery?: string;
 }
 
 // Speech Recognition API interface
@@ -47,8 +48,8 @@ declare global {
   }
 }
 
-const SearchHome: React.FC<SearchHomeProps> = ({ onCategorySelect }) => {
-  const [query, setQuery] = useState('');
+const SearchHome: React.FC<SearchHomeProps> = ({ onCategorySelect, initialQuery }) => {
+  const [query, setQuery] = useState(initialQuery || '');
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAi, setSelectedAi] = useState<AiModel>('gemini');
@@ -57,6 +58,29 @@ const SearchHome: React.FC<SearchHomeProps> = ({ onCategorySelect }) => {
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
+
+    setIsLoading(true);
+    setSearchResult(null);
+    try {
+      const result = await search(searchQuery, selectedAi);
+      setSearchResult(result);
+    } catch (err: any) {
+      addToast(err.message, 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedAi, addToast]);
+
+
+  useEffect(() => {
+    if (initialQuery) {
+        setQuery(initialQuery);
+        handleSearch(initialQuery);
+    }
+  }, [initialQuery, handleSearch]);
 
   useEffect(() => {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -90,22 +114,7 @@ const SearchHome: React.FC<SearchHomeProps> = ({ onCategorySelect }) => {
     };
 
     recognitionRef.current = recognition;
-  }, [addToast]);
-
-  const handleSearch = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
-
-    setIsLoading(true);
-    setSearchResult(null);
-    try {
-      const result = await search(searchQuery, selectedAi);
-      setSearchResult(result);
-    } catch (err: any) {
-      addToast(err.message, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [addToast, handleSearch]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
