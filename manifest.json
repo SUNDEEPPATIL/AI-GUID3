@@ -39,11 +39,18 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot2.svg",
+      "src": "/screenshots/home-narrow.svg",
       "sizes": "540x960",
       "type": "image/svg+xml",
       "form_factor": "narrow",
-      "label": "A placeholder screenshot for mobile devices"
+      "label": "Gadget Guide AI home screen on a mobile device"
+    },
+    {
+      "src": "/screenshots/home-wide.svg",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Gadget Guide AI home screen on a desktop device"
     }
   ],
   "shortcuts": [
