@@ -15,7 +15,6 @@ const APP_SHELL_URLS = [
   '/icon.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/screenshots/screenshot1.png',
   '/screenshots/screenshot2.svg',
 ];
 
