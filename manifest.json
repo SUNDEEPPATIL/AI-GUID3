@@ -39,16 +39,16 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/home-narrow.svg",
-      "sizes": "540x960",
-      "type": "image/svg+xml",
+      "src": "/screenshots/screenshot-mobile.png",
+      "sizes": "450x900",
+      "type": "image/png",
       "form_factor": "narrow",
       "label": "Gadget Guide AI home screen on a mobile device"
     },
     {
-      "src": "/screenshots/home-wide.svg",
-      "sizes": "1280x720",
-      "type": "image/svg+xml",
+      "src": "/screenshots/screenshot-desktop.png",
+      "sizes": "1440x900",
+      "type": "image/png",
       "form_factor": "wide",
       "label": "Gadget Guide AI home screen on a desktop device"
     }
