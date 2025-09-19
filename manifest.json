@@ -39,13 +39,6 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot1.png",
-      "sizes": "1041x949",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Gadget Guide AI home screen for search and category selection"
-    },
-    {
       "src": "/screenshots/screenshot2.svg",
       "sizes": "540x960",
       "type": "image/svg+xml",
@@ -75,7 +68,7 @@
       "url": "https://play.google.com/store/apps/details?id=com.example.gadgetguide"
     }
   ],
-  "prefer_related_applications": true,
+  "prefer_related_applications": false,
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
